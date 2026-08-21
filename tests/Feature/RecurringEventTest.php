@@ -192,6 +192,59 @@ class RecurringEventTest extends TestCase
         ]);
     }
 
+    public function test_future_event_registration_is_disabled_until_start_time_unless_admin_overrides()
+    {
+        // Evento que inicia mañana a las 10:00 AM
+        $futureEvent = Event::create([
+            'access_code' => 'FUTURE-001',
+            'title' => 'Evento Futuro',
+            'event_date' => Carbon::tomorrow()->toDateString(),
+            'start_time' => '10:00',
+            'end_time' => '14:00',
+            'status' => 'active',
+            'allow_registration' => true,
+            'override_closing' => false,
+        ]);
+
+        $this->assertTrue($futureEvent->is_not_started);
+        $this->assertFalse($futureEvent->is_registration_open);
+        $this->assertEquals('not_started', $futureEvent->registration_status_info['reason']);
+
+        // Intentar registrarse en evento que no ha comenzado debe ser rechazado
+        $response = $this->post(route('attendance.register', ['code' => 'FUTURE-001']), [
+            'employee_code' => '6001',
+            'first_name' => 'Sara',
+            'last_name' => 'Connor',
+            'signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseMissing('attendances', [
+            'event_id' => $futureEvent->id,
+        ]);
+
+        // El administrador decide abrir el registro con anticipación arbitrariamente
+        $admin = User::factory()->create(['role' => 'superadmin']);
+        $this->actingAs($admin)->post(route('admin.events.toggle_registration', $futureEvent));
+
+        $futureEvent->refresh();
+        $this->assertTrue($futureEvent->override_closing);
+        $this->assertTrue($futureEvent->is_registration_open);
+
+        // Ahora el participante puede registrarse satisfactoriamente
+        $responseSuccess = $this->post(route('attendance.register', ['code' => 'FUTURE-001']), [
+            'employee_code' => '6001',
+            'first_name' => 'Sara',
+            'last_name' => 'Connor',
+            'signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        ]);
+
+        $responseSuccess->assertRedirect();
+        $this->assertDatabaseHas('attendances', [
+            'event_id' => $futureEvent->id,
+        ]);
+    }
+
     public function test_admin_can_export_series_excel_matrix()
     {
         $admin = User::factory()->create(['role' => 'superadmin']);

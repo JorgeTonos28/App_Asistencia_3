@@ -70,12 +70,24 @@
 
     @if(!$event->is_registration_open)
         <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center space-y-4 shadow-sm">
-            <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center mx-auto">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <div class="w-16 h-16 rounded-full {{ $event->registration_status_info['reason'] === 'not_started' ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-700' }} flex items-center justify-center mx-auto">
+                @if($event->registration_status_info['reason'] === 'not_started')
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                @else
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                @endif
             </div>
-            <h2 class="text-xl font-bold text-slate-900">{{ $event->registration_status_info['message'] }}</h2>
+            <h2 class="text-xl font-bold text-slate-900">
+                @if($event->registration_status_info['reason'] === 'not_started')
+                    Registro No Disponible Aún
+                @else
+                    {{ $event->registration_status_info['message'] }}
+                @endif
+            </h2>
             <p class="text-sm text-slate-500 max-w-md mx-auto">
-                @if($event->registration_status_info['reason'] === 'expired_schedule')
+                @if($event->registration_status_info['reason'] === 'not_started')
+                    Este evento está programado para el día <strong class="text-slate-800">{{ $event->event_date->format('d/m/Y') }}</strong>@if($event->start_time) a partir de las <strong class="text-slate-800">{{ \Carbon\Carbon::parse($event->start_time)->format('h:i A') }}</strong>@endif. El registro de firmas se habilitará automáticamente al dar inicio la jornada.
+                @elseif($event->registration_status_info['reason'] === 'expired_schedule')
                     El horario establecido para este evento ha concluido. El registro digital de asistencia se ha cerrado automáticamente.
                 @else
                     El registro de firmas y asistencia para este evento no está disponible en este momento.

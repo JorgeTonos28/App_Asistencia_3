@@ -146,7 +146,29 @@ class Event extends Model
         return [];
     }
 
-    // --- Lógica de Cierre Automático por Fecha y Hora ---
+    // --- Lógica de Apertura y Cierre Automático por Fecha y Hora ---
+
+    public function getStartDateTimeAttribute(): ?Carbon
+    {
+        if (!$this->event_date) {
+            return null;
+        }
+
+        $dateStr = $this->event_date->format('Y-m-d');
+        $timeStr = $this->start_time ? substr($this->start_time, 0, 8) : '00:00:00';
+
+        return Carbon::parse("{$dateStr} {$timeStr}");
+    }
+
+    public function getIsNotStartedAttribute(): bool
+    {
+        $startDateTime = $this->start_date_time;
+        if (!$startDateTime) {
+            return false;
+        }
+
+        return now()->lessThan($startDateTime);
+    }
 
     public function getEndDateTimeAttribute(): ?Carbon
     {
@@ -180,9 +202,14 @@ class Event extends Model
             return false;
         }
 
-        // Si el administrador forzó la reapertura manual, se mantiene abierto aunque haya vencido el horario
+        // Si el administrador forzó la habilitación manual (override), se mantiene abierto sin importar el horario
         if ($this->override_closing) {
             return true;
+        }
+
+        // Si el evento aún no ha iniciado (está en el futuro), se mantiene cerrado hasta que empiece
+        if ($this->is_not_started) {
+            return false;
         }
 
         // Si la hora de finalización ya pasó, se cierra automáticamente
@@ -226,8 +253,18 @@ class Event extends Model
             return [
                 'open' => true,
                 'reason' => 'reopened_by_admin',
-                'message' => 'Reabierto por Administrador',
+                'message' => 'Habilitado por Administrador',
                 'badge_class' => 'bg-indigo-600 text-white animate-pulse',
+            ];
+        }
+
+        if ($this->is_not_started) {
+            $formattedStart = $this->event_date->format('d/m/Y') . ($this->start_time ? ' ' . Carbon::parse($this->start_time)->format('h:i A') : '');
+            return [
+                'open' => false,
+                'reason' => 'not_started',
+                'message' => "Apertura Programada ({$formattedStart})",
+                'badge_class' => 'bg-sky-600 text-white',
             ];
         }
 
