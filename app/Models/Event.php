@@ -76,10 +76,22 @@ class Event extends Model
     public function getStatusBadgeAttribute(): array
     {
         return match ($this->status) {
-            'active' => ['label' => 'En Curso / Activo', 'class' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-300'],
-            'completed' => ['label' => 'Finalizado', 'class' => 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-blue-300'],
-            'cancelled' => ['label' => 'Cancelado', 'class' => 'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300 border-rose-300'],
-            default => ['label' => 'Borrador', 'class' => 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300'],
+            'active' => [
+                'label' => 'En Curso / Activo',
+                'class' => 'bg-emerald-600 text-white font-black shadow-sm shadow-emerald-600/25',
+            ],
+            'completed' => [
+                'label' => 'Finalizado',
+                'class' => 'bg-slate-700 text-white font-black shadow-sm',
+            ],
+            'cancelled' => [
+                'label' => 'Cancelado',
+                'class' => 'bg-rose-600 text-white font-black shadow-sm shadow-rose-600/25',
+            ],
+            default => [
+                'label' => 'Borrador',
+                'class' => 'bg-slate-500 text-white font-bold',
+            ],
         };
     }
 }
