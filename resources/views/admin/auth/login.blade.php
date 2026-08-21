@@ -12,7 +12,7 @@
                 </svg>
             </div>
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Iniciar Sesión</h2>
-            <p class="text-xs text-slate-500 mt-1.5">Ingresa al panel para gestionar eventos y asistencias</p>
+            <p class="text-xs text-slate-500 mt-1.5">Ingresa tus credenciales para acceder al panel administrativo</p>
         </div>
 
         @if($errors->any())
@@ -32,7 +32,7 @@
             <div>
                 <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Correo Electrónico</label>
                 <div class="relative">
-                    <input type="email" id="email" name="email" value="{{ old('email', 'admin@asistencia.com') }}" required autofocus
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm transition-all bg-slate-50/50 focus:bg-white"
                            placeholder="tu.correo@ejemplo.com">
                     <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
@@ -44,7 +44,7 @@
             <div>
                 <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contraseña</label>
                 <div class="relative">
-                    <input type="password" id="password" name="password" value="password123" required
+                    <input type="password" id="password" name="password" required
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm transition-all bg-slate-50/50 focus:bg-white"
                            placeholder="••••••••">
                     <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
@@ -55,7 +55,7 @@
 
             <div class="flex items-center justify-between text-xs">
                 <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
-                    <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked>
+                    <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
                     <span>Recordar sesión</span>
                 </label>
             </div>
@@ -65,17 +65,6 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
         </form>
-
-        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-left">
-                <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Acceso de Demostración</span>
-                    <span class="text-[10px] bg-brand-100 text-brand-700 font-semibold px-2 py-0.5 rounded-full">Listo</span>
-                </div>
-                <p class="text-xs text-slate-600">Usuario: <code class="text-brand-600 font-mono font-semibold">admin@asistencia.com</code></p>
-                <p class="text-xs text-slate-600">Clave: <code class="text-brand-600 font-mono font-semibold">password123</code></p>
-            </div>
-        </div>
     </div>
 </div>
 @endsection
