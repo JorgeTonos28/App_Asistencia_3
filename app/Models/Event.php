@@ -157,7 +157,7 @@ class Event extends Model
         $dateStr = $this->event_date->format('Y-m-d');
         $timeStr = $this->start_time ? substr($this->start_time, 0, 8) : '00:00:00';
 
-        return Carbon::parse("{$dateStr} {$timeStr}");
+        return Carbon::parse("{$dateStr} {$timeStr}", config('app.timezone', 'America/Santo_Domingo'));
     }
 
     public function getIsNotStartedAttribute(): bool
@@ -167,7 +167,7 @@ class Event extends Model
             return false;
         }
 
-        return now()->lessThan($startDateTime);
+        return now(config('app.timezone', 'America/Santo_Domingo'))->lessThan($startDateTime);
     }
 
     public function getEndDateTimeAttribute(): ?Carbon
@@ -179,7 +179,7 @@ class Event extends Model
         $dateStr = $this->event_date->format('Y-m-d');
         $timeStr = $this->end_time ? substr($this->end_time, 0, 8) : '23:59:59';
 
-        return Carbon::parse("{$dateStr} {$timeStr}");
+        return Carbon::parse("{$dateStr} {$timeStr}", config('app.timezone', 'America/Santo_Domingo'));
     }
 
     public function getIsPastEndTimeAttribute(): bool
@@ -189,7 +189,7 @@ class Event extends Model
             return false;
         }
 
-        return now()->greaterThan($endDateTime);
+        return now(config('app.timezone', 'America/Santo_Domingo'))->greaterThan($endDateTime);
     }
 
     public function getIsRegistrationOpenAttribute(): bool
