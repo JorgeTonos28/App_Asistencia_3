@@ -338,10 +338,12 @@
         const btnResetBottom = document.getElementById('btn-reset-form-bottom');
 
         let lookupTimeout = null;
+        let lastLookupTerm = '';
 
         function performLookup(term) {
             const cleanTerm = term ? term.trim() : '';
             if (cleanTerm.length < 2) return;
+            if (cleanTerm === lastLookupTerm) return;
 
             if (spinner) spinner.classList.remove('hidden');
 
@@ -350,6 +352,7 @@
                 .then(data => {
                     if (spinner) spinner.classList.add('hidden');
                     if (data.found && data.participant) {
+                        lastLookupTerm = cleanTerm;
                         const p = data.participant;
                         if (codeInput && p.employee_code) codeInput.value = p.employee_code;
                         if (docInput && p.document_number) docInput.value = p.document_number;
@@ -361,7 +364,6 @@
 
                         if (alertBox) {
                             alertBox.classList.remove('hidden');
-                            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         }
                     }
                 })
@@ -376,7 +378,7 @@
                 clearTimeout(lookupTimeout);
                 lookupTimeout = setTimeout(() => performLookup(codeInput.value), 450);
             });
-            codeInput.addEventListener('blur', function () {
+            codeInput.addEventListener('change', function () {
                 performLookup(codeInput.value);
             });
         }
@@ -386,13 +388,14 @@
                 clearTimeout(lookupTimeout);
                 lookupTimeout = setTimeout(() => performLookup(docInput.value), 450);
             });
-            docInput.addEventListener('blur', function () {
+            docInput.addEventListener('change', function () {
                 performLookup(docInput.value);
             });
         }
 
         // --- 3. FUNCIÓN PARA LIMPIAR TODO EL FORMULARIO ---
         function resetEntireForm() {
+            lastLookupTerm = '';
             if (codeInput) codeInput.value = '';
             if (docInput) docInput.value = '';
             if (firstNameInput) firstNameInput.value = '';

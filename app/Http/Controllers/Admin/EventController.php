@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\Event;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -316,5 +318,22 @@ class EventController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Cache-Control' => 'max-age=0',
         ]);
+    }
+
+    public function destroyAttendance(Event $event, Attendance $attendance)
+    {
+        if ($attendance->event_id !== $event->id) {
+            abort(404);
+        }
+
+        if ($attendance->signature_path && Storage::disk('public')->exists($attendance->signature_path)) {
+            Storage::disk('public')->delete($attendance->signature_path);
+        }
+
+        $participantName = $attendance->participant ? $attendance->participant->full_name : 'Participante';
+        $attendance->delete();
+
+        return redirect()->route('admin.events.show', $event)
+            ->with('success', "Se ha eliminado a {$participantName} de la lista de asistencia del evento.");
     }
 }

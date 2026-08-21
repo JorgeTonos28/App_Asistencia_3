@@ -181,6 +181,7 @@
                         <th class="py-3.5 px-4">Departamento / Área</th>
                         <th class="py-3.5 px-4 text-center">Firma Digital</th>
                         <th class="py-3.5 px-4">Fecha y Hora</th>
+                        <th class="py-3.5 px-4 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -223,10 +224,20 @@
                                 <span class="font-medium text-slate-800">{{ $attendance->check_in_at->format('d/m/Y') }}</span>
                                 <span class="block text-[11px] text-slate-400">{{ $attendance->check_in_at->format('h:i:s A') }}</span>
                             </td>
+                            <td class="py-3 px-4 text-right">
+                                <form method="POST" action="{{ route('admin.events.attendances.destroy', [$event, $attendance]) }}" onsubmit="return confirm('¿Estás seguro de que deseas quitar a {{ addslashes($attendance->participant->full_name) }} de la lista de asistencia de este evento?');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-100 transition-all" title="Quitar de la lista de asistencia">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        <span>Quitar</span>
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-12 text-center text-slate-400">
+                            <td colspan="9" class="py-12 text-center text-slate-400">
                                 No se encontraron registros de asistencia para este evento.
                             </td>
                         </tr>

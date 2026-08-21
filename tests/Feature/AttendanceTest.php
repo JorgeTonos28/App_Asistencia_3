@@ -108,4 +108,84 @@ class AttendanceTest extends TestCase
         $responseFeed->assertStatus(200)
             ->assertJsonStructure(['count', 'status', 'allow_registration', 'attendances']);
     }
+
+    public function test_admin_can_remove_person_from_event_attendance_list()
+    {
+        $admin = User::factory()->create([
+            'role' => 'superadmin',
+        ]);
+
+        $event = Event::create([
+            'access_code' => 'TEST-DEL-01',
+            'title' => 'Evento a Limpiar Asistencia',
+            'event_date' => now()->toDateString(),
+            'status' => 'active',
+        ]);
+
+        $participant = Participant::create([
+            'employee_code' => '8888',
+            'document_number' => '402-8888888-8',
+            'first_name' => 'Carlos',
+            'last_name' => 'Santana',
+        ]);
+
+        $attendance = $event->attendances()->create([
+            'participant_id' => $participant->id,
+            'signature_path' => 'signatures/test_signature.png',
+            'check_in_at' => now(),
+        ]);
+
+        Storage::disk('public')->put('signatures/test_signature.png', 'fake_image_content');
+
+        $this->assertDatabaseHas('attendances', [
+            'id' => $attendance->id,
+            'event_id' => $event->id,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->delete(route('admin.events.attendances.destroy', [$event, $attendance]));
+
+        $response->assertRedirect(route('admin.events.show', $event));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('attendances', [
+            'id' => $attendance->id,
+        ]);
+
+        // Verify participant is preserved in catalogue
+        $this->assertDatabaseHas('participants', [
+            'id' => $participant->id,
+        ]);
+
+        // Verify signature file was removed
+        $this->assertFalse(Storage::disk('public')->exists('signatures/test_signature.png'));
+    }
+
+    public function test_guest_cannot_remove_person_from_event_attendance_list()
+    {
+        $event = Event::create([
+            'access_code' => 'TEST-DEL-02',
+            'title' => 'Evento Privado',
+            'event_date' => now()->toDateString(),
+            'status' => 'active',
+        ]);
+
+        $participant = Participant::create([
+            'employee_code' => '7777',
+            'first_name' => 'Luis',
+            'last_name' => 'Gomez',
+        ]);
+
+        $attendance = $event->attendances()->create([
+            'participant_id' => $participant->id,
+            'check_in_at' => now(),
+        ]);
+
+        $response = $this->delete(route('admin.events.attendances.destroy', [$event, $attendance]));
+
+        $response->assertRedirect(route('login'));
+        $this->assertDatabaseHas('attendances', [
+            'id' => $attendance->id,
+        ]);
+    }
 }
