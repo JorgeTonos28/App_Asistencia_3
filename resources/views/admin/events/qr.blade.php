@@ -55,7 +55,7 @@
     <main class="w-full max-w-7xl mx-auto my-auto py-2">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- Columna Izquierda: Tarjeta de Proyección y QR (7 Columnas) -->
+            <!-- Columna Izquierda: Tarjeta de Proyección y QR (5 Columnas) -->
             <div class="lg:col-span-6 xl:col-span-5 space-y-5">
                 <div class="print-card bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 text-center shadow-2xl backdrop-blur-xl space-y-5 relative overflow-hidden">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-bold uppercase tracking-wider">
@@ -97,7 +97,7 @@
                 </div>
             </div>
 
-            <!-- Columna Derecha: Métricas y Flujo de Asistencias en Tiempo Real (5-7 Columnas) -->
+            <!-- Columna Derecha: Métricas y Flujo de Asistencias en Tiempo Real (7 Columnas) -->
             <div class="lg:col-span-6 xl:col-span-7 space-y-5 no-print">
                 <!-- Contador de Asistentes en Vivo -->
                 <div class="bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-800 rounded-3xl p-6 shadow-xl flex items-center justify-between">
@@ -123,7 +123,7 @@
                         <span class="text-[11px] text-slate-400">Actualizado al instante</span>
                     </div>
 
-                    <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+                    <div class="space-y-3 max-h-[460px] overflow-y-auto p-1">
                         <template x-if="attendances.length === 0">
                             <div class="py-12 text-center text-slate-500 text-xs space-y-2">
                                 <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
@@ -134,18 +134,29 @@
                         </template>
 
                         <template x-for="(item, index) in attendances" :key="item.id">
-                            <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl flex items-center justify-between gap-3 transition-all duration-300"
-                                 :class="{ 'ring-2 ring-emerald-500 bg-slate-800': index === 0 }">
+                            <div class="p-3.5 rounded-2xl flex items-center justify-between gap-3 transition-all duration-300"
+                                 :class="index === 0 ? 'bg-slate-800/95 border-2 border-emerald-500 shadow-lg shadow-emerald-500/10' : 'bg-slate-800/80 border border-slate-700/80'">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-black flex items-center justify-center text-sm shadow-md flex-shrink-0"
+                                    <div class="w-10 h-10 rounded-xl text-white font-black flex items-center justify-center text-sm shadow-md flex-shrink-0"
+                                         :class="index === 0 ? 'bg-gradient-to-tr from-emerald-600 to-teal-500' : 'bg-gradient-to-tr from-brand-600 to-indigo-600'"
                                          x-text="item.full_name.substring(0, 1)">
                                     </div>
                                     <div>
-                                        <h4 class="text-xs sm:text-sm font-bold text-white leading-tight" x-text="item.full_name"></h4>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-xs sm:text-sm font-bold text-white leading-tight" x-text="item.full_name"></h4>
+                                            <template x-if="index === 0">
+                                                <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.2 rounded-full uppercase">Último</span>
+                                            </template>
+                                        </div>
                                         <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-400 mt-0.5 font-mono">
-                                            <span x-text="'Cód: ' + item.employee_code"></span>
+                                            <template x-if="item.employee_code && item.employee_code !== 'N/A'">
+                                                <span x-text="'Cód: ' + item.employee_code"></span>
+                                            </template>
                                             <template x-if="item.document_number && item.document_number !== 'N/A'">
-                                                <span>• <span x-text="item.document_number"></span></span>
+                                                <span x-text="(item.employee_code && item.employee_code !== 'N/A' ? '• ' : '') + item.document_number"></span>
+                                            </template>
+                                            <template x-if="item.department && item.department !== 'N/A' && item.department !== 'INFOTEP'">
+                                                <span x-text="'• ' + item.department"></span>
                                             </template>
                                         </div>
                                     </div>
@@ -173,9 +184,9 @@
         </div>
     </main>
 
-    <!-- Footer -->
+    <!-- Footer Institucional -->
     <footer class="no-print text-center text-xs text-slate-500 py-3">
-        AsistenciaPro &copy; {{ date('Y') }} · Sistema de Control Digital de Asistencia
+        Dirección de Innovación y Análisis Estratégico de Datos - INNOVATEP
     </footer>
 
     <script>

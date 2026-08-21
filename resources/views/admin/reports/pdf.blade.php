@@ -184,7 +184,7 @@
     </table>
 
     <div class="footer">
-        Documento generado automáticamente por AsistenciaPro el {{ date('d/m/Y \a \l\a\s h:i A') }}
+        Dirección de Innovación y Análisis Estratégico de Datos - INNOVATEP · Generado el {{ date('d/m/Y \a \l\a\s h:i A') }}
     </div>
 </body>
 </html>

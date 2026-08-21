@@ -171,6 +171,10 @@
                 @endif
 
                 @yield('content')
+
+                <footer class="mt-12 py-4 border-t border-slate-200 text-center text-xs text-slate-400">
+                    Dirección de Innovación y Análisis Estratégico de Datos - INNOVATEP
+                </footer>
             </main>
         </div>
     </div>
