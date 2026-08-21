@@ -130,6 +130,11 @@ Bienvenido al repositorio de **AsistenciaPro** (Sistema de Control y Registro de
 2. Alpine.js ejecuta polling cada 3 segundos al endpoint `/event/{code}/live-feed`.
 3. Actualiza el contador gigante de asistentes y agrega dinámicamente las tarjetas de los nuevos registrados junto a la miniatura de su firma digital.
 
+### D. Roles y Control de Acceso (`superadmin` vs `event_admin`)
+1. **Administrador General (`superadmin`)**: Tiene acceso completo a la creación, edición y eliminación de eventos, participantes, y **gestión exclusiva de usuarios del sistema (`/admin/users`)**.
+2. **Administrador de Eventos (`event_admin`)**: Puede crear y gestionar eventos, monitorear en vivo, ver y descargar listas de asistencia y participantes. No tiene acceso al módulo de administración de usuarios.
+3. **Módulo de Mi Perfil (`/admin/profile`)**: Cualquier usuario autenticado puede modificar su nombre, correo y cambiar su contraseña de acceso.
+
 ---
 
 ## 6. Comandos Operativos para Agentes
@@ -162,11 +167,11 @@ php artisan storage:link
 - **URL de Acceso**: `/login`
 - **Email**: `admin@asistencia.com`
 - **Password**: `password123`
+- **Rol Inicial**: `superadmin` (Administrador General)
 
 ---
 
 ## 8. Guía para Futuras Extensiones
 
-- **Autenticación Multifactor / Roles**: Si se requiere rol "Instructor" vs "Super Admin", extender `User` con un campo `role` o paquete `spatie/laravel-permission`.
 - **Integración con Hardware**: Para lectores de código de barras / carnet físico, el input de código de empleado ya cuenta con foco automático y procesa eventos de `change` y `blur`.
 - **Envío de Comprobante por Correo**: Se puede despachar un Job en cola (`SendAttendanceReceiptJob`) tras `Attendance::create()` utilizando `Mail::to($participant->email)`.

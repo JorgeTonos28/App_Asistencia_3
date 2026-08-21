@@ -31,6 +31,12 @@
 - **Exportación de Reportes**:
   - **PDF Oficial**: Hoja de asistencia formal con encabezados institucionales, tabla numerada y la **imagen de la firma digital** incrustada de cada asistente.
   - **Excel (.xlsx)**: Hoja de cálculo estilizada con bordes, colores corporativos y ajuste automático de columnas.
+- **Gestión de Administradores y Roles**:
+  - **Administrador General**: Control total para crear, editar, activar/desactivar y eliminar otros administradores del sistema.
+  - **Administrador de Eventos**: Acceso a la gestión de cursos, eventos y participantes, sin permisos de administración de usuarios.
+- **Módulo de Configuración de Perfil**:
+  - Actualización de nombre y correo.
+  - Cambio seguro de contraseña con validación de clave actual.
 - **Directorio Global de Participantes**: Historial cronológico por participante de todos los cursos y eventos a los que ha asistido con sus firmas.
 
 ---
