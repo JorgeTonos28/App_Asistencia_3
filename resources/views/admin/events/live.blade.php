@@ -16,11 +16,16 @@
                 <span class="text-xs font-mono text-slate-400 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
                     CÓDIGO: {{ $event->access_code }}
                 </span>
+                @if($event->isRecurring())
+                    <span class="text-xs font-bold text-brand-300 bg-brand-900/60 px-2.5 py-1 rounded-lg border border-brand-700">
+                        {{ $event->series_session_label }}
+                    </span>
+                @endif
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ $event->title }}</h1>
             <p class="text-xs text-slate-400 flex items-center gap-4">
                 <span>📅 {{ $event->event_date->format('d/m/Y') }}</span>
-                @if($event->instructor) <span>👨‍🏫 {{ $event->instructor }}</span> @endif
+                @if($event->formatted_instructors && $event->formatted_instructors !== 'No asignado') <span>👨‍🏫 {{ $event->formatted_instructors }}</span> @endif
                 @if($event->location) <span>📍 {{ $event->location }}</span> @endif
             </p>
         </div>

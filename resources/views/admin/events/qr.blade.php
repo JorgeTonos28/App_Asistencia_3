@@ -65,14 +65,18 @@
             <div class="lg:col-span-6 xl:col-span-5 space-y-4">
                 <div class="print-card bg-slate-900/95 border border-slate-800/90 rounded-3xl p-5 sm:p-8 text-center shadow-2xl backdrop-blur-xl space-y-4 sm:space-y-5 relative overflow-hidden">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[11px] font-bold uppercase tracking-wider">
-                        Registro de Asistencia Digital
+                        <span>Registro de Asistencia Digital</span>
+                        @if($event->isRecurring())
+                            <span>•</span>
+                            <span class="text-white font-extrabold">{{ $event->series_session_label }}</span>
+                        @endif
                     </div>
 
                     <div class="space-y-1.5">
                         <h1 class="print-text-dark text-xl sm:text-2xl lg:text-3xl font-black tracking-tight leading-snug text-white break-words">{{ $event->title }}</h1>
                         <p class="print-text-muted text-xs sm:text-sm text-slate-300">
                             {{ $event->event_date->format('d/m/Y') }}
-                            @if($event->instructor) · {{ $event->instructor }} @endif
+                            @if($event->formatted_instructors && $event->formatted_instructors !== 'No asignado') · {{ $event->formatted_instructors }} @endif
                             @if($event->location) · {{ $event->location }} @endif
                         </p>
                     </div>

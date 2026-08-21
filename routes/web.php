@@ -64,6 +64,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/events/{event}/qr', [EventController::class, 'qr'])->name('events.qr');
     Route::get('/events/{event}/export-pdf', [EventController::class, 'exportPdf'])->name('events.export_pdf');
     Route::get('/events/{event}/export-excel', [EventController::class, 'exportExcel'])->name('events.export_excel');
+    Route::get('/events/{event}/export-series-excel', [EventController::class, 'exportSeriesExcel'])->name('events.export_series_excel');
 
     // Gestión de Participantes
     Route::get('/participants', [ParticipantController::class, 'index'])->name('participants.index');

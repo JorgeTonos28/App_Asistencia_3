@@ -1,9 +1,14 @@
 @extends('layouts.admin')
 
-@section('title', $event->title)
+@section('title', $event->title . ($event->isRecurring() ? " ({$event->series_session_label})" : ''))
 
 @section('content')
-<div class="space-y-6" x-data="{ signatureModal: false, activeSignatureUrl: '', activeParticipantName: '', qrModal: false }">
+<div class="space-y-6" x-data="{ 
+    signatureModal: false, 
+    activeSignatureUrl: '', 
+    activeParticipantName: '', 
+    missingModal: false 
+}">
     <!-- Navegación y Acciones Superiores -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -16,14 +21,39 @@
                 <span class="text-xs font-bold px-3 py-1 rounded-full {{ $event->status_badge['class'] }}">
                     {{ $event->status_badge['label'] }}
                 </span>
+                @if($event->isRecurring())
+                    <span class="text-xs font-black px-3 py-1 rounded-full bg-brand-100 text-brand-800 border border-brand-200">
+                        {{ $event->series_session_label }}
+                    </span>
+                @endif
+                <!-- Badge de Cierre / Apertura de Registro -->
+                <span class="text-xs font-bold px-3 py-1 rounded-full {{ $event->registration_status_info['badge_class'] }}">
+                    {{ $event->registration_status_info['message'] }}
+                </span>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+            <!-- Botón Toggle Apertura / Cierre de Asistencia -->
+            <form method="POST" action="{{ route('admin.events.toggle_registration', $event) }}" class="inline">
+                @csrf
+                @if($event->is_registration_open)
+                    <button type="submit" class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1.5" title="Pausar o cerrar el registro">
+                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Pausar Registro</span>
+                    </button>
+                @else
+                    <button type="submit" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all inline-flex items-center gap-1.5" title="Reabrir registro manualmente">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Reabrir Registro</span>
+                    </button>
+                @endif
+            </form>
+
             <!-- Proyección Pública y QR en Vivo -->
             <a href="{{ route('attendance.qr', ['code' => $event->access_code]) }}" target="_blank" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all inline-flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                <span>Proyectar QR en Pantalla</span>
+                <span>Proyectar QR</span>
             </a>
 
             <!-- Monitoreo en Vivo -->
@@ -44,6 +74,14 @@
                 <span>Excel</span>
             </a>
 
+            @if($event->isRecurring())
+                <!-- Exportar Matriz Completa de la Serie -->
+                <a href="{{ route('admin.events.export_series_excel', $event) }}" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold text-xs rounded-xl transition-all inline-flex items-center gap-1.5" title="Descargar Matriz Consolidada de Asistencia de toda la serie">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7zm0 4h16M9 4v16"/></svg>
+                    <span>Matriz Serie Excel</span>
+                </a>
+            @endif
+
             <!-- Editar -->
             <a href="{{ route('admin.events.edit', $event) }}" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all inline-flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -51,6 +89,92 @@
             </a>
         </div>
     </div>
+
+    <!-- Si es parte de una serie recurrente: Barra de Navegación entre Sesiones -->
+    @if($event->isRecurring())
+        <div class="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Sesiones de esta Serie / Taller ({{ $seriesEvents->count() }} Días)
+                </span>
+                <span class="text-xs text-slate-400 font-medium">Haz clic en cualquier sesión para ver sus firmas o proyectar su QR</span>
+            </div>
+
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                @foreach($seriesEvents as $s)
+                    <a href="{{ route('admin.events.show', $s) }}" 
+                       class="flex-shrink-0 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all border flex items-center gap-2 {{ $s->id === $event->id ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-500/20' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <span class="w-5 h-5 rounded-full {{ $s->id === $event->id ? 'bg-white text-brand-700' : 'bg-slate-200 text-slate-700' }} flex items-center justify-center text-[10px] font-black">
+                            {{ $s->session_number }}
+                        </span>
+                        <span>Sesión {{ $s->session_number }} ({{ $s->event_date->format('d/m') }})</span>
+                        <span class="text-[11px] opacity-80 font-normal">({{ $s->attendances_count ?? $s->attendances()->count() }} asistencias)</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <!-- Tarjeta de Tracking de Retención y Ausencias (si es evento recurrente) -->
+    @if($event->isRecurring())
+        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-6 shadow-xl border border-slate-700">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="space-y-1">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-bold text-brand-200 border border-white/10">
+                        <span>📊 Control de Retención de Asistencia</span>
+                        <span>•</span>
+                        <span>Referencia: Sesión 1</span>
+                    </div>
+                    <h3 class="text-xl font-bold tracking-tight">
+                        @if($retention['is_base_session'])
+                            Sesión Inicial Base de la Serie
+                        @else
+                            Seguimiento de Asistencia vs Día 1
+                        @endif
+                    </h3>
+                    <p class="text-xs text-slate-300">
+                        @if($retention['is_base_session'])
+                            Esta es la sesión de apertura. Todos los asistentes aquí registrados definirán la base de retención esperada para las siguientes sesiones.
+                        @else
+                            Comparando los participantes registrados en este día con los que iniciaron el taller en la Sesión 1.
+                        @endif
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <div class="text-center sm:text-left">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Base Sesión 1</span>
+                        <span class="text-2xl font-black text-white">{{ $retention['base_total'] }}</span>
+                    </div>
+
+                    <div class="text-center sm:text-left">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Asistieron Hoy</span>
+                        <span class="text-2xl font-black text-emerald-400">{{ $retention['current_total'] }}</span>
+                    </div>
+
+                    @if(!$retention['is_base_session'])
+                        <div class="text-center sm:text-left">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Retención</span>
+                            <span class="text-2xl font-black text-brand-300">{{ $retention['retention_rate'] }}%</span>
+                        </div>
+
+                        <div class="text-center sm:text-left">
+                            <span class="text-[10px] font-bold text-rose-300 uppercase tracking-wider block">Faltantes</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-2xl font-black text-rose-400">{{ $retention['missing_count'] }}</span>
+                                @if($retention['missing_count'] > 0)
+                                    <button type="button" @click="missingModal = true" class="px-2 py-0.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/40 text-[10px] font-bold rounded-lg transition-colors">
+                                        Ver quiénes
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Tarjeta de Detalles del Evento -->
     <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
@@ -69,8 +193,8 @@
             </div>
 
             <div class="space-y-1">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Facilitador / Instructor</span>
-                <p class="text-sm font-bold text-slate-800">{{ $event->instructor ?? 'No asignado' }}</p>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Facilitador(es) / Instructor(es)</span>
+                <p class="text-sm font-bold text-slate-800">{{ $event->formatted_instructors }}</p>
                 <p class="text-xs text-slate-500">{{ $event->location ?? 'Ubicación no especificada' }}</p>
             </div>
 
@@ -85,10 +209,16 @@
             </div>
 
             <div class="space-y-1 bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center">
-                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Asistencias</span>
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Asistencias en esta Sesión</span>
                 <span class="text-3xl font-black text-brand-600">{{ $totalAttendees }}</span>
             </div>
         </div>
+
+        @if($event->description)
+            <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-600">
+                <span class="font-bold text-slate-700">Temario / Objetivos:</span> {{ $event->description }}
+            </div>
+        @endif
 
         <!-- Enlaces Públicos para compartir (Registro de Participantes y Proyección en Pantalla) -->
         <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -99,7 +229,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </div>
                     <div class="truncate">
-                        <span class="text-[11px] font-bold text-brand-900 uppercase tracking-wider block">1. Enlace para Participantes</span>
+                        <span class="text-[11px] font-bold text-brand-900 uppercase tracking-wider block">1. Enlace para Participantes (Sesión {{ $event->session_number }})</span>
                         <a href="{{ route('attendance.form', ['code' => $event->access_code]) }}" target="_blank" class="text-xs text-brand-700 hover:underline font-mono truncate block">
                             {{ route('attendance.form', ['code' => $event->access_code]) }}
                         </a>
@@ -146,11 +276,11 @@
         </div>
     </div>
 
-    <!-- Lista de Participantes Registrados -->
+    <!-- Lista de Participantes Registrados en esta sesión -->
     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h2 class="text-lg font-bold text-slate-900">Listado de Asistencia Registrada ({{ $totalAttendees }})</h2>
+                <h2 class="text-lg font-bold text-slate-900">Listado de Asistencia Registrada en esta Sesión ({{ $totalAttendees }})</h2>
                 <p class="text-xs text-slate-500">Participantes que han completado el formulario y firmado</p>
             </div>
 
@@ -238,7 +368,7 @@
                     @empty
                         <tr>
                             <td colspan="9" class="py-12 text-center text-slate-400">
-                                No se encontraron registros de asistencia para este evento.
+                                No se encontraron registros de asistencia para esta sesión.
                             </td>
                         </tr>
                     @endforelse
@@ -273,5 +403,61 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Participantes Faltantes (Ausentes vs Sesión 1) -->
+    @if($event->isRecurring() && !$retention['is_base_session'])
+        <div x-show="missingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm" x-cloak>
+            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col" @click.outside="missingModal = false">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 flex-shrink-0">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <span>Participantes Ausentes en esta Sesión ({{ $missingAttendees->count() }})</span>
+                        </h3>
+                        <p class="text-xs text-slate-500">Asistieron a la Sesión 1 pero aún no han firmado en la Sesión {{ $event->session_number }}</p>
+                    </div>
+                    <button @click="missingModal = false" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="overflow-y-auto flex-1 divide-y divide-slate-100">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                                <th class="py-2.5 px-3">Código</th>
+                                <th class="py-2.5 px-3">Cédula</th>
+                                <th class="py-2.5 px-3">Nombre Completo</th>
+                                <th class="py-2.5 px-3">Teléfono</th>
+                                <th class="py-2.5 px-3">Departamento</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @forelse($missingAttendees as $m)
+                                <tr>
+                                    <td class="py-2.5 px-3 font-mono font-bold">{{ $m->employee_code ?? '-' }}</td>
+                                    <td class="py-2.5 px-3 font-mono text-slate-600">{{ $m->document_number ?? '-' }}</td>
+                                    <td class="py-2.5 px-3 font-bold text-slate-900">{{ $m->full_name }}</td>
+                                    <td class="py-2.5 px-3">{{ $m->phone ?? '-' }}</td>
+                                    <td class="py-2.5 px-3">{{ $m->institution_department ?? '-' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-emerald-600 font-bold">
+                                        ¡Excelente! Todos los participantes de la Sesión 1 han firmado en esta sesión (100% de asistencia retenida).
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between flex-shrink-0">
+                    <span class="text-xs text-slate-500">Total Faltantes: <strong class="text-rose-600">{{ $missingAttendees->count() }}</strong></span>
+                    <button type="button" @click="missingModal = false" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 @endsection

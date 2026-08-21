@@ -123,11 +123,16 @@
         <table>
             <tr>
                 <td class="label">Evento / Curso:</td>
-                <td style="font-weight: bold; font-size: 11px; color: #0f172a;" colspan="3">{{ $event->title }}</td>
+                <td style="font-weight: bold; font-size: 11px; color: #0f172a;" colspan="3">
+                    {{ $event->title }}
+                    @if($event->isRecurring())
+                        <span style="font-size: 9px; color: #2563eb;">({{ $event->series_session_label }})</span>
+                    @endif
+                </td>
             </tr>
             <tr>
-                <td class="label">Facilitador:</td>
-                <td>{{ $event->instructor ?? 'No especificado' }}</td>
+                <td class="label">Facilitador(es):</td>
+                <td>{{ $event->formatted_instructors }}</td>
                 <td class="label">Fecha:</td>
                 <td>{{ $event->event_date->format('d/m/Y') }}</td>
             </tr>

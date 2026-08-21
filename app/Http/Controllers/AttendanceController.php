@@ -75,8 +75,9 @@ class AttendanceController extends Controller
     {
         $event = Event::where('access_code', $code)->firstOrFail();
 
-        if (!$event->allow_registration || $event->status === 'cancelled') {
-            return back()->with('error', 'El registro de asistencia para este evento se encuentra cerrado o no disponible.');
+        if (!$event->is_registration_open) {
+            $info = $event->registration_status_info;
+            return back()->with('error', 'El registro de asistencia para este evento se encuentra cerrado (' . $info['message'] . ').');
         }
 
         // Reglas dinámicas según la configuración del evento
@@ -233,7 +234,8 @@ class AttendanceController extends Controller
         return response()->json([
             'count' => $event->attendances()->count(),
             'status' => $event->status,
-            'allow_registration' => $event->allow_registration,
+            'allow_registration' => $event->is_registration_open,
+            'registration_status_info' => $event->registration_status_info,
             'attendances' => $attendances,
         ]);
     }
