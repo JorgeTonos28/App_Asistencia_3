@@ -34,19 +34,23 @@
                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm">
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Código de Acceso (Único)</label>
-                    <div class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-brand-700 font-mono font-bold text-sm flex items-center justify-between">
-                        <span>⚡ Generado Automáticamente</span>
-                        <span class="text-[10px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-full font-sans font-bold">Auto</span>
+                    <label for="access_code" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Código de Acceso (Asignado)</label>
+                    <div class="relative">
+                        <input type="text" id="access_code" name="access_code" value="{{ $defaultCode }}" readonly
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono font-bold text-brand-700 text-sm cursor-not-allowed outline-none select-all">
+                        <span class="absolute right-2.5 top-2.5 text-[10px] bg-emerald-100 text-emerald-800 font-black uppercase px-2 py-0.5 rounded-full">
+                            ⚡ Auto
+                        </span>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">El sistema asignará un código irrepetible único al guardar el evento.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Código único generado automáticamente para el QR y enlace.</p>
                 </div>
 
                 <div>
                     <label for="instructor" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Facilitador / Instructor</label>
                     <input type="text" id="instructor" name="instructor" value="{{ old('instructor') }}" placeholder="Ej: Ing. Laura Morales"
-                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm">
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm">
                 </div>
             </div>
 

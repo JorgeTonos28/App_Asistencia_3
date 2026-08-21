@@ -42,13 +42,18 @@ class EventController extends Controller
 
     public function create()
     {
-        return view('admin.events.create');
+        do {
+            $defaultCode = 'CAP-' . date('Y') . '-' . strtoupper(Str::random(4));
+        } while (Event::where('access_code', $defaultCode)->exists());
+
+        return view('admin.events.create', compact('defaultCode'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'access_code' => 'nullable|string|max:20',
             'description' => 'nullable|string',
             'instructor' => 'nullable|string|max:150',
             'location' => 'nullable|string|max:150',
@@ -62,10 +67,13 @@ class EventController extends Controller
             'theme_color' => 'nullable|string|max:20',
         ]);
 
-        // Generar código único irrepetible automáticamente
-        do {
-            $code = 'CAP-' . date('Y') . '-' . strtoupper(Str::random(4));
-        } while (Event::where('access_code', $code)->exists());
+        // Asignar código único generado o validar que no exista colisión
+        $code = !empty($request->access_code) ? strtoupper(trim($request->access_code)) : null;
+        if (!$code || Event::where('access_code', $code)->exists()) {
+            do {
+                $code = 'CAP-' . date('Y') . '-' . strtoupper(Str::random(4));
+            } while (Event::where('access_code', $code)->exists());
+        }
 
         $validated['access_code'] = $code;
         $validated['allow_registration'] = $request->boolean('allow_registration');
