@@ -34,12 +34,13 @@
                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm">
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="access_code" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Código de Acceso (Único) <span class="text-rose-500">*</span></label>
-                    <input type="text" id="access_code" name="access_code" value="{{ old('access_code', $defaultCode) }}" required uppercase
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm font-mono font-bold text-brand-700 uppercase">
-                    <p class="text-[11px] text-slate-400 mt-1">Este código se usará en el enlace y código QR (ej: /event/{{ $defaultCode }}).</p>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Código de Acceso (Único)</label>
+                    <div class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-brand-700 font-mono font-bold text-sm flex items-center justify-between">
+                        <span>⚡ Generado Automáticamente</span>
+                        <span class="text-[10px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-full font-sans font-bold">Auto</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">El sistema asignará un código irrepetible único al guardar el evento.</p>
                 </div>
 
                 <div>

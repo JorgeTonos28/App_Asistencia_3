@@ -42,15 +42,13 @@ class EventController extends Controller
 
     public function create()
     {
-        $defaultCode = strtoupper(Str::random(6));
-        return view('admin.events.create', compact('defaultCode'));
+        return view('admin.events.create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'access_code' => 'required|string|max:20|unique:events,access_code',
             'description' => 'nullable|string',
             'instructor' => 'nullable|string|max:150',
             'location' => 'nullable|string|max:150',
@@ -64,14 +62,19 @@ class EventController extends Controller
             'theme_color' => 'nullable|string|max:20',
         ]);
 
-        $validated['access_code'] = strtoupper(trim($validated['access_code']));
+        // Generar código único irrepetible automáticamente
+        do {
+            $code = 'CAP-' . date('Y') . '-' . strtoupper(Str::random(4));
+        } while (Event::where('access_code', $code)->exists());
+
+        $validated['access_code'] = $code;
         $validated['allow_registration'] = $request->boolean('allow_registration');
         $validated['require_document'] = $request->boolean('require_document');
         $validated['created_by'] = Auth::id();
 
         $event = Event::create($validated);
 
-        return redirect()->route('admin.events.show', $event)->with('success', 'Evento creado exitosamente. Ya puedes compartir el enlace o código QR.');
+        return redirect()->route('admin.events.show', $event)->with('success', 'Evento creado exitosamente con el código ' . $code . '. Ya puedes compartir el enlace o código QR.');
     }
 
     public function show(Event $event, Request $request)
@@ -105,7 +108,6 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'access_code' => 'required|string|max:20|unique:events,access_code,' . $event->id,
             'description' => 'nullable|string',
             'instructor' => 'nullable|string|max:150',
             'location' => 'nullable|string|max:150',
@@ -119,7 +121,6 @@ class EventController extends Controller
             'theme_color' => 'nullable|string|max:20',
         ]);
 
-        $validated['access_code'] = strtoupper(trim($validated['access_code']));
         $validated['allow_registration'] = $request->boolean('allow_registration');
         $validated['require_document'] = $request->boolean('require_document');
 

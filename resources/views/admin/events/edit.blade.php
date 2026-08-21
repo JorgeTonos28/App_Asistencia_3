@@ -35,11 +35,13 @@
                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm">
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="access_code" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Código de Acceso (Único) <span class="text-rose-500">*</span></label>
-                    <input type="text" id="access_code" name="access_code" value="{{ old('access_code', $event->access_code) }}" required uppercase
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm font-mono font-bold text-brand-700 uppercase">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Código de Acceso (Único)</label>
+                    <div class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-mono font-bold text-sm flex items-center justify-between">
+                        <span>{{ $event->access_code }}</span>
+                        <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-sans font-bold">Fijo</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">El código no puede modificarse para proteger los enlaces y QR existentes.</p>
                 </div>
 
                 <div>

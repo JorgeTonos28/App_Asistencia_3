@@ -7,9 +7,14 @@
     .signature-container {
         position: relative;
         touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
     }
     canvas#signature-pad {
         touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
         cursor: crosshair;
     }
 </style>
@@ -235,37 +240,80 @@
     document.addEventListener('DOMContentLoaded', function () {
         // --- 1. CANVAS DE FIRMA DIGITAL ---
         const canvas = document.getElementById('signature-pad');
+        const signatureContainer = document.querySelector('.signature-container');
         const signaturePlaceholder = document.getElementById('signature-placeholder');
         const signatureInput = document.getElementById('signature-input');
         const btnClear = document.getElementById('btn-clear-signature');
         const form = document.getElementById('attendance-form');
 
         let signaturePad = null;
+        let resizeTimer = null;
+
+        // Función para retirar el foco y ocultar el teclado virtual al tocar la zona de firma
+        function dismissActiveInput() {
+            if (document.activeElement && typeof document.activeElement.blur === 'function' && document.activeElement !== document.body) {
+                document.activeElement.blur();
+            }
+        }
 
         if (canvas) {
             function resizeCanvas() {
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
                 const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * ratio;
-                canvas.height = rect.height * ratio;
-                canvas.getContext("2d").scale(ratio, ratio);
+                const newWidth = Math.round(rect.width * ratio);
+                const newHeight = Math.round(rect.height * ratio);
+
+                // Si las dimensiones no han cambiado, no recalcular para evitar parpadeos
+                if (canvas.width === newWidth && canvas.height === newHeight) {
+                    return;
+                }
+
+                // Guardar trazo previo para no perderlo al abrir o cerrar el teclado del móvil
+                let savedData = null;
+                if (signaturePad && !signaturePad.isEmpty()) {
+                    savedData = signaturePad.toData();
+                }
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                const ctx = canvas.getContext("2d");
+                ctx.scale(ratio, ratio);
+
                 if (signaturePad) {
                     signaturePad.clear();
+                    if (savedData && savedData.length > 0) {
+                        signaturePad.fromData(savedData);
+                        if (signaturePlaceholder) signaturePlaceholder.style.display = 'none';
+                    }
                 }
             }
 
-            window.addEventListener("resize", resizeCanvas);
-
+            // Trazo fino, suave y natural
             signaturePad = new SignaturePad(canvas, {
                 backgroundColor: 'rgb(255, 255, 255)',
                 penColor: 'rgb(15, 23, 42)',
-                minWidth: 1.5,
-                maxWidth: 3.5,
+                minWidth: 0.8,
+                maxWidth: 2.2,
+                velocityFilterWeight: 0.7,
+                throttle: 16
             });
 
             resizeCanvas();
 
+            window.addEventListener("resize", function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(resizeCanvas, 150);
+            });
+
+            // Al interactuar con el lienzo de firma, quitar el foco de cualquier input abierto
+            if (signatureContainer) {
+                signatureContainer.addEventListener('touchstart', dismissActiveInput, { passive: true });
+                signatureContainer.addEventListener('pointerdown', dismissActiveInput, { passive: true });
+                signatureContainer.addEventListener('mousedown', dismissActiveInput, { passive: true });
+            }
+
             signaturePad.addEventListener("beginStroke", () => {
+                dismissActiveInput();
                 if (signaturePlaceholder) signaturePlaceholder.style.display = 'none';
             });
 
