@@ -90,7 +90,7 @@
     </main>
 
     <footer class="w-full py-4 text-center text-xs text-slate-400 border-t border-slate-200 bg-white">
-        <p>&copy; {{ date('Y') }} Sistema de Registro y Control de Asistencia. Todos los derechos reservados.</p>
+        <p>Dirección de Innovación y Análisis Estratégico de Datos - INNOVATEP</p>
     </footer>
 
     @stack('scripts')
