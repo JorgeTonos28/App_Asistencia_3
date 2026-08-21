@@ -33,7 +33,7 @@
             </div>
             <div class="h-12 w-[1px] bg-slate-700"></div>
             <div class="flex flex-col gap-2">
-                <a href="{{ route('admin.events.qr', $event) }}" target="_blank" class="p-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5" title="Proyectar QR en Pantalla Completa">
+                <a href="{{ route('attendance.qr', ['code' => $event->access_code]) }}" target="_blank" class="p-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5" title="Proyectar QR en Pantalla Completa (Público)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                     <span>Proyectar QR</span>
                 </a>
@@ -129,7 +129,7 @@
                 </div>
 
                 <div class="pt-2 border-t border-slate-100">
-                    <a href="{{ route('admin.events.qr', $event) }}" target="_blank" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2">
+                    <a href="{{ route('attendance.qr', ['code' => $event->access_code]) }}" target="_blank" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
                         <span>Pantalla Completa para Auditorio</span>
                     </a>

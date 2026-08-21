@@ -184,13 +184,11 @@ class EventController extends Controller
     }
 
     /**
-     * Pantalla de Código QR y proyección.
+     * Redirección a la pantalla pública de proyección de QR.
      */
     public function qr(Event $event)
     {
-        $registrationUrl = route('attendance.form', ['code' => $event->access_code]);
-
-        return view('admin.events.qr', compact('event', 'registrationUrl'));
+        return redirect()->route('attendance.qr', ['code' => $event->access_code]);
     }
 
     /**

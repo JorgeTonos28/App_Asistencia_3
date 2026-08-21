@@ -90,29 +90,58 @@
             </div>
         </div>
 
-        <!-- Enlace público para compartir con botón de copiar -->
-        <div class="mt-6 pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-brand-50/50 p-4 rounded-2xl border border-brand-100">
-            <div class="flex items-center gap-3 overflow-hidden">
-                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+        <!-- Enlaces Públicos para compartir (Registro de Participantes y Proyección en Pantalla) -->
+        <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- 1. Enlace para Participantes -->
+            <div class="flex flex-col justify-between gap-3 bg-brand-50/50 p-4 rounded-2xl border border-brand-100">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    </div>
+                    <div class="truncate">
+                        <span class="text-[11px] font-bold text-brand-900 uppercase tracking-wider block">1. Enlace para Participantes</span>
+                        <a href="{{ route('attendance.form', ['code' => $event->access_code]) }}" target="_blank" class="text-xs text-brand-700 hover:underline font-mono truncate block">
+                            {{ route('attendance.form', ['code' => $event->access_code]) }}
+                        </a>
+                    </div>
                 </div>
-                <div class="truncate">
-                    <span class="text-[11px] font-bold text-brand-900 uppercase tracking-wider block">Enlace de Registro para Participantes</span>
-                    <a href="{{ route('attendance.form', ['code' => $event->access_code]) }}" target="_blank" class="text-xs text-brand-700 hover:underline font-mono truncate block">
-                        {{ route('attendance.form', ['code' => $event->access_code]) }}
+                <div class="flex items-center gap-2 pt-2 border-t border-brand-100/60">
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ route('attendance.form', ['code' => $event->access_code]) }}'); alert('¡Enlace para participantes copiado!');"
+                            class="flex-1 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        <span>Copiar Enlace</span>
+                    </button>
+                    <a href="{{ route('attendance.form', ['code' => $event->access_code]) }}" target="_blank" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                        <span>Abrir</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </a>
                 </div>
             </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <button type="button" onclick="navigator.clipboard.writeText('{{ route('attendance.form', ['code' => $event->access_code]) }}'); alert('¡Enlace de registro copiado al portapapeles!');"
-                        class="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                    <span>Copiar Enlace</span>
-                </button>
-                <a href="{{ route('attendance.form', ['code' => $event->access_code]) }}" target="_blank" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
-                    <span>Abrir Formulario</span>
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                </a>
+
+            <!-- 2. Enlace de Proyección Pública -->
+            <div class="flex flex-col justify-between gap-3 bg-slate-900 text-white p-4 rounded-2xl border border-slate-800">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                    </div>
+                    <div class="truncate">
+                        <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">2. Enlace de Proyección Pública (Sin Login)</span>
+                        <a href="{{ route('attendance.qr', ['code' => $event->access_code]) }}" target="_blank" class="text-xs text-slate-300 hover:text-white hover:underline font-mono truncate block">
+                            {{ route('attendance.qr', ['code' => $event->access_code]) }}
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ route('attendance.qr', ['code' => $event->access_code]) }}'); alert('¡Enlace de proyección pública copiado!');"
+                            class="flex-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        <span>Copiar Enlace Proyección</span>
+                    </button>
+                    <a href="{{ route('attendance.qr', ['code' => $event->access_code]) }}" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                        <span>Proyectar</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
