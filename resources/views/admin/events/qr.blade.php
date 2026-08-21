@@ -24,14 +24,20 @@
 <body class="min-h-full flex flex-col justify-between p-4 sm:p-6 lg:p-8 antialiased selection:bg-brand-500 selection:text-white"
       x-data="projectionApp('{{ route('attendance.live_feed', ['code' => $event->access_code]) }}')" x-init="init()">
 
-    <!-- Barra de Controles (Solo visible si es Admin o en pantalla) -->
+    <!-- Barra de Controles (Los botones de navegación administrativa solo aparecen si el Administrador está logueado) -->
     <header class="no-print w-full max-w-7xl mx-auto flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
         <div class="flex items-center gap-3">
             @auth
-                <a href="{{ route('admin.events.show', $event) }}" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    Volver al Panel
-                </a>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('admin.events.show', $event) }}" class="text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all" title="Regresar a la gestión del evento">
+                        <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span>Detalle Evento</span>
+                    </a>
+                    <a href="{{ route('admin.dashboard') }}" class="text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all" title="Ir al panel principal">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        <span>Panel Admin</span>
+                    </a>
+                </div>
             @endauth
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>

@@ -26,13 +26,13 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login.post') }}" class="space-y-5">
+        <form method="POST" action="{{ route('login.post') }}" autocomplete="off" class="space-y-5">
             @csrf
 
             <div>
                 <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Correo Electrónico</label>
                 <div class="relative">
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm transition-all bg-slate-50/50 focus:bg-white"
                            placeholder="tu.correo@ejemplo.com">
                     <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
@@ -44,7 +44,7 @@
             <div>
                 <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contraseña</label>
                 <div class="relative">
-                    <input type="password" id="password" name="password" required
+                    <input type="password" id="password" name="password" required autocomplete="new-password"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm transition-all bg-slate-50/50 focus:bg-white"
                            placeholder="••••••••">
                     <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
