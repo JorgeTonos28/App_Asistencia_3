@@ -247,7 +247,118 @@ class EventController extends Controller
 
         $event->update($validated);
 
+        // Si es el evento principal y se añadieron nuevas sesiones desde la edición
+        if ($event->parent_id === null && $request->boolean('is_recurring') && !empty($request->new_sessions) && is_array($request->new_sessions)) {
+            $maxSessionNum = $event->sessions()->max('session_number') ?? 1;
+            $nextNum = $maxSessionNum + 1;
+
+            foreach ($request->new_sessions as $sessionData) {
+                if (empty($sessionData['event_date'])) {
+                    continue;
+                }
+
+                do {
+                    $childCode = 'CAP-' . date('Y') . '-' . strtoupper(Str::random(4));
+                } while (Event::where('access_code', $childCode)->exists());
+
+                $childInstructors = [];
+                if (!empty($sessionData['instructors']) && is_array($sessionData['instructors'])) {
+                    $childInstructors = array_values(array_filter(array_map('trim', $sessionData['instructors'])));
+                } elseif (!empty($sessionData['instructor'])) {
+                    $childInstructors = array_values(array_filter(array_map('trim', explode(',', $sessionData['instructor']))));
+                } else {
+                    $childInstructors = $instructorsList;
+                }
+
+                $childFormattedInstructor = count($childInstructors) > 0 ? implode(', ', $childInstructors) : $formattedInstructor;
+
+                Event::create([
+                    'parent_id' => $event->id,
+                    'session_number' => $nextNum,
+                    'access_code' => $childCode,
+                    'title' => $event->title,
+                    'description' => !empty($sessionData['description']) ? $sessionData['description'] : $event->description,
+                    'instructor' => $childFormattedInstructor,
+                    'instructors' => $childInstructors,
+                    'location' => !empty($sessionData['location']) ? $sessionData['location'] : $event->location,
+                    'event_date' => $sessionData['event_date'],
+                    'start_time' => !empty($sessionData['start_time']) ? $sessionData['start_time'] : $event->start_time,
+                    'end_time' => !empty($sessionData['end_time']) ? $sessionData['end_time'] : $event->end_time,
+                    'status' => $event->status,
+                    'allow_registration' => true,
+                    'override_closing' => false,
+                    'require_document' => $event->require_document,
+                    'department_mode' => $event->department_mode,
+                    'theme_color' => $event->theme_color,
+                    'created_by' => Auth::id(),
+                ]);
+
+                $nextNum++;
+            }
+        }
+
         return redirect()->route('admin.events.show', $event)->with('success', 'Evento actualizado correctamente.');
+    }
+
+    /**
+     * Agregar una nueva sesión a un evento existente (convirtiéndolo en serie si era único).
+     */
+    public function storeSession(Request $request, Event $event)
+    {
+        $root = $event->getRootEvent();
+
+        $validated = $request->validate([
+            'event_date' => 'required|date|after_or_equal:' . $root->event_date->format('Y-m-d'),
+            'start_time' => 'nullable',
+            'end_time' => 'nullable',
+            'location' => 'nullable|string|max:150',
+            'instructor' => 'nullable|string|max:255',
+            'instructors' => 'nullable|array',
+            'instructors.*' => 'nullable|string|max:150',
+            'description' => 'nullable|string',
+        ], [
+            'event_date.after_or_equal' => 'La fecha de la nueva sesión no puede ser anterior a la fecha de inicio del evento (' . $root->event_date->format('d/m/Y') . ').',
+        ]);
+
+        $nextSessionNum = ($root->sessions()->max('session_number') ?? 1) + 1;
+
+        do {
+            $childCode = 'CAP-' . date('Y') . '-' . strtoupper(Str::random(4));
+        } while (Event::where('access_code', $childCode)->exists());
+
+        $instructorsList = [];
+        if (!empty($validated['instructors']) && is_array($validated['instructors'])) {
+            $instructorsList = array_values(array_filter(array_map('trim', $validated['instructors'])));
+        } elseif (!empty($validated['instructor'])) {
+            $instructorsList = array_values(array_filter(array_map('trim', explode(',', $validated['instructor']))));
+        } else {
+            $instructorsList = $root->instructors_list;
+        }
+
+        $formattedInstructor = count($instructorsList) > 0 ? implode(', ', $instructorsList) : $root->instructor;
+
+        $newSession = Event::create([
+            'parent_id' => $root->id,
+            'session_number' => $nextSessionNum,
+            'access_code' => $childCode,
+            'title' => $root->title,
+            'description' => !empty($validated['description']) ? $validated['description'] : $root->description,
+            'instructor' => $formattedInstructor,
+            'instructors' => $instructorsList,
+            'location' => !empty($validated['location']) ? $validated['location'] : $root->location,
+            'event_date' => $validated['event_date'],
+            'start_time' => !empty($validated['start_time']) ? $validated['start_time'] : $root->start_time,
+            'end_time' => !empty($validated['end_time']) ? $validated['end_time'] : $root->end_time,
+            'status' => $root->status,
+            'allow_registration' => true,
+            'override_closing' => false,
+            'require_document' => $root->require_document,
+            'department_mode' => $root->department_mode,
+            'theme_color' => $root->theme_color,
+            'created_by' => Auth::id(),
+        ]);
+
+        return redirect()->route('admin.events.show', $newSession)->with('success', "Se ha agregado la Sesión #{$nextSessionNum} exitosamente a la serie con código {$childCode}.");
     }
 
     public function toggleRegistration(Event $event)

@@ -56,6 +56,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::post('/events/{event}/toggle-registration', [EventController::class, 'toggleRegistration'])->name('events.toggle_registration');
+    Route::post('/events/{event}/sessions', [EventController::class, 'storeSession'])->name('events.sessions.store');
     Route::delete('/events/{event}/attendances/{attendance}', [EventController::class, 'destroyAttendance'])->name('events.attendances.destroy');
 
     // Funciones Especiales de Eventos

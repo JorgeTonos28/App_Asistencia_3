@@ -7,7 +7,8 @@
     signatureModal: false, 
     activeSignatureUrl: '', 
     activeParticipantName: '', 
-    missingModal: false 
+    missingModal: false,
+    addSessionModal: false
 }">
     <!-- Navegación y Acciones Superiores -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -34,6 +35,12 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+            <!-- Botón Agregar Sesión (Convertir en serie o agregar día) -->
+            <button type="button" @click="addSessionModal = true" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all inline-flex items-center gap-1.5" title="Agregar una nueva sesión / día a este evento">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>{{ $event->isRecurring() ? '+ Agregar Sesión' : '+ Convertir en Serie / Agregar Día' }}</span>
+            </button>
+
             <!-- Botón Toggle Apertura / Cierre de Asistencia -->
             <form method="POST" action="{{ route('admin.events.toggle_registration', $event) }}" class="inline">
                 @csrf
@@ -98,7 +105,10 @@
                     <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     Sesiones de esta Serie / Taller ({{ $seriesEvents->count() }} Días)
                 </span>
-                <span class="text-xs text-slate-400 font-medium">Haz clic en cualquier sesión para ver sus firmas o proyectar su QR</span>
+                <button type="button" @click="addSessionModal = true" class="text-xs text-brand-600 hover:text-brand-800 font-bold flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>+ Agregar Próxima Sesión</span>
+                </button>
             </div>
 
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
@@ -459,5 +469,80 @@
             </div>
         </div>
     @endif
+
+    <!-- Modal para Agregar Nueva Sesión / Día a este Evento -->
+    <div x-show="addSessionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm" x-cloak>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4" @click.outside="addSessionModal = false">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                        {{ $event->isRecurring() ? '+ Agregar Nueva Sesión / Día' : '+ Convertir en Serie y Agregar Día 2' }}
+                    </h3>
+                    <p class="text-xs text-slate-500">
+                        {{ $event->title }}
+                    </p>
+                </div>
+                <button @click="addSessionModal = false" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.events.sessions.store', $event) }}" class="space-y-4">
+                @csrf
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Fecha de la Nueva Sesión <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="date" name="event_date" 
+                           min="{{ $event->getRootEvent()->event_date->format('Y-m-d') }}"
+                           value="{{ \Carbon\Carbon::parse($event->event_date)->addDay()->format('Y-m-d') }}"
+                           required
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-sm">
+                    <p class="text-[11px] text-slate-400 mt-1">No puede ser anterior a la fecha inicial del taller ({{ $event->getRootEvent()->event_date->format('d/m/Y') }}).</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Hora Inicio</label>
+                        <input type="time" name="start_time" value="{{ $event->start_time ? substr($event->start_time, 0, 5) : '09:00' }}"
+                               class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-500 outline-none text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Hora Fin</label>
+                        <input type="time" name="end_time" value="{{ $event->end_time ? substr($event->end_time, 0, 5) : '13:00' }}"
+                               class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-500 outline-none text-xs">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Ubicación / Salón</label>
+                    <input type="text" name="location" value="{{ $event->location }}" placeholder="Salón o Modalidad"
+                           class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 outline-none text-xs">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Facilitador(es) para esta sesión</label>
+                    <input type="text" name="instructor" value="{{ $event->formatted_instructors !== 'No asignado' ? $event->formatted_instructors : '' }}" placeholder="Ej: Ing. Laura Morales, Lic. Carlos Gómez"
+                           class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 outline-none text-xs">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Temario u Objetivos del Día (Opcional)</label>
+                    <textarea name="description" rows="2" placeholder="Temario específico para este día..."
+                              class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 outline-none text-xs"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="addSessionModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20">
+                        Crear Sesión y Generar QR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

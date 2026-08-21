@@ -228,4 +228,76 @@ class RecurringEventTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     }
+
+    public function test_admin_can_convert_existing_single_event_to_recurring_by_adding_session()
+    {
+        $admin = User::factory()->create(['role' => 'superadmin']);
+
+        // Evento existente creado como evento único
+        $singleEvent = Event::create([
+            'access_code' => 'UNICO-001',
+            'title' => 'Taller de Excel Avanzado',
+            'event_date' => '2026-08-25',
+            'status' => 'active',
+            'session_number' => 1,
+            'parent_id' => null,
+            'instructor' => 'Lic. Roberto Díaz',
+        ]);
+
+        // Registrar participantes en el evento existente
+        $p1 = Participant::create(['employee_code' => '8001', 'first_name' => 'Mario', 'last_name' => 'Bros']);
+        $singleEvent->attendances()->create(['participant_id' => $p1->id, 'check_in_at' => now()]);
+
+        $this->assertFalse($singleEvent->isRecurring());
+        $this->assertEquals(1, $singleEvent->attendances()->count());
+
+        // El admin decide agregar el Día 2 a este evento
+        $response = $this->actingAs($admin)
+            ->post(route('admin.events.sessions.store', $singleEvent), [
+                'event_date' => '2026-08-26',
+                'start_time' => '09:00',
+                'end_time' => '12:00',
+                'location' => 'Laboratorio 2',
+                'instructor' => 'Lic. Roberto Díaz, Ing. Mario Casas',
+                'description' => 'Día 2: Macros y VBA',
+            ]);
+
+        $response->assertRedirect();
+
+        $singleEvent->refresh();
+        $this->assertTrue($singleEvent->isRecurring());
+        $this->assertEquals(1, $singleEvent->sessions()->count());
+
+        $session2 = $singleEvent->sessions()->first();
+        $this->assertEquals(2, $session2->session_number);
+        $this->assertEquals($singleEvent->id, $session2->parent_id);
+        $this->assertEquals('2026-08-26 00:00:00', $session2->event_date->format('Y-m-d H:i:s'));
+        $this->assertEquals('Laboratorio 2', $session2->location);
+
+        // Las firmas de la Sesión 1 siguen intactas
+        $this->assertEquals(1, $singleEvent->attendances()->count());
+    }
+
+    public function test_cannot_create_session_with_date_prior_to_base_event()
+    {
+        $admin = User::factory()->create(['role' => 'superadmin']);
+
+        $baseEvent = Event::create([
+            'access_code' => 'BASE-001',
+            'title' => 'Conferencia Anual',
+            'event_date' => '2026-08-25',
+            'status' => 'active',
+            'session_number' => 1,
+            'parent_id' => null,
+        ]);
+
+        // Intentar agregar una sesión con fecha anterior a la del evento base
+        $response = $this->actingAs($admin)
+            ->post(route('admin.events.sessions.store', $baseEvent), [
+                'event_date' => '2026-08-20', // Fecha en el pasado relativo
+            ]);
+
+        $response->assertSessionHasErrors('event_date');
+        $this->assertEquals(0, $baseEvent->sessions()->count());
+    }
 }
